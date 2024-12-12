@@ -41,7 +41,7 @@ const TodoList = () => {
         }
       );
       setNewItem('');
-      fetchChecklist(); // re-fetch checklist after adding item
+      fetchChecklist(); 
     } catch (err) {
       setError('Gagal menambahkan checklist.');
       console.error(err);
@@ -83,22 +83,41 @@ const TodoList = () => {
         </button>
       </div>
 
-      <ul className="space-y-2">
-        {checklist.map((item) => (
-          <li
-            key={item.id}
-            className="flex justify-between items-center p-3 border-b border-gray-200"
-          >
-            <span className="text-lg">{item.name}</span>
-            <button
-              onClick={() => handleDelete(item.id)}
+      
+
+      <ul className="space-y-4">
+          {checklist.map((checklistItem) => (
+            <div key={checklistItem.id} className="mb-4">
+              <h2 className="text-xl font-semibold mb-2">{checklistItem.name}</h2>
+              <button
+              onClick={() => handleDelete(checklistItem.id)}
               className="text-red-500 hover:text-red-700"
             >
               Hapus
             </button>
-          </li>
-        ))}
-      </ul>
+              <ul className="space-y-2">
+                {checklistItem.items?.map((item) => (
+                  <li
+                    key={item.id}
+                    className={`flex items-center justify-between p-2 border rounded-lg ${
+                      item.itemCompletionStatus
+                        ? 'bg-green-200 line-through'
+                        : 'bg-gray-100'
+                    }`}
+                  >
+                    <span>{item.name}</span>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Hapus
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </ul>
     </div>
   );
 };
