@@ -24,62 +24,70 @@ const TodoList = () => {
     fetchChecklist();
   }, []);
 
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://94.74.86.174:8080/api/checklist/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        }
+      });
+
+      // Setelah item dihapus, lakukan fetch lagi untuk memperbarui data checklist
+      const response = await axios.get('http://94.74.86.174:8080/api/checklist', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,  
+        }
+      });
+      setChecklist(response.data.data);
+    } catch (err) {
+      setError('Gagal menghapus checklist.');
+      console.error(err);
+    }
+  };
+
   const handleAddItem = async (e) => {
     e.preventDefault();
-    if (!newItem) {
-      setError('Tugas tidak boleh kosong');
-      return;
-    }
-
     try {
-      const response = await axios.post(
-        'http://94.74.86.174:8080/api/checklist',
-        { task: newItem }, 
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,  
-          }
+      await axios.post('http://94.74.86.174:8080/api/checklist', {
+        name: newItem,
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         }
-      );
+      });
 
-      setChecklist([...checklist, response.data.data]);
-      setNewItem(''); 
-      setError('');   
+      // Setelah menambahkan item baru, lakukan fetch lagi untuk memperbarui data checklist
+      const response = await axios.get('http://94.74.86.174:8080/api/checklist', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,  
+        }
+      });
+      setChecklist(response.data.data);
+      setNewItem(''); // Reset input field
     } catch (err) {
-      setError('Gagal menambahkan tugas.');
+      setError('Gagal menambahkan checklist.');
       console.error(err);
     }
   };
 
   return (
-    <div className="todo-container">
-      <h1 className="text-xl font-semibold mb-4">Daftar Tugas</h1>
-
-      <ul>
-        {checklist.map((item) => (
-          <li key={item.id}>
-            {item.name} 
-          </li>
-        ))}
-      </ul>
-
-      <form onSubmit={handleAddItem} className="mb-4">
+    <div>
+      <h1>Todo List</h1>
+      {error && <p>{error}</p>}
+      <form onSubmit={handleAddItem}>
         <input
           type="text"
           value={newItem}
           onChange={(e) => setNewItem(e.target.value)}
-          placeholder="Tulis tugas baru..."
-          className="input-field"
+          placeholder="Add new item"
         />
-        <button type="submit" className="add-button">Tambah</button>
+        <button type="submit">Add</button>
       </form>
-
-      {error && <p className="error-message">{error}</p>}
-
       <ul>
         {checklist.map((item) => (
-          <li key={item.id} className="task-item">
-            {item.task} 
+          <li key={item.id}>
+            {item.name}
+            <button className='bg-red-500' onClick={() => handleDelete(item.id)}>Delete</button>
           </li>
         ))}
       </ul>
